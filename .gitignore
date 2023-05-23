@@ -19,3 +19,14 @@
 
 # Go workspace file
 go.work
+
+# temp files
+tmp
+
+# ide
+.idea
+
+
+# binary
+bin
+
