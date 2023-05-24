@@ -33,6 +33,7 @@ func NewTemplateParam(src, dst *TemplateStruct) *TemplateParam {
 	}
 }
 
+// parseTemplateParam parses template param
 func parseTemplateParam(srcName, dstName string, pkgs []*packages.Package) (*TemplateParam, error) {
 	specs := findTypeSpec(pkgs, []string{srcName, dstName})
 	structs, err := parseTypeSecStructs(specs)
@@ -50,6 +51,7 @@ func parseTemplateParam(srcName, dstName string, pkgs []*packages.Package) (*Tem
 	return NewTemplateParam(src, dst), nil
 }
 
+// parseTypeSecStruct parses ast.TypeSpec to TemplateStruct
 func parseTypeSecStruct(spec *ast.TypeSpec) (*TemplateStruct, error) {
 	s := &TemplateStruct{
 		Name: spec.Name.Name,
@@ -72,6 +74,7 @@ func parseTypeSecStruct(spec *ast.TypeSpec) (*TemplateStruct, error) {
 	return s, nil
 }
 
+// parseTypeSecStructs parses map[string]ast.TypeSpecs to map[string]TemplateStructs
 func parseTypeSecStructs(spec map[string]*ast.TypeSpec) (map[string]*TemplateStruct, error) {
 	ret := make(map[string]*TemplateStruct, len(spec))
 	for name, ts := range spec {

@@ -37,7 +37,7 @@ func NewGenerator(arg *GeneratorArg) (*Generator, error) {
 	// load template
 	tmpl, err := newCopyTemplate()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	// parse template paramr
