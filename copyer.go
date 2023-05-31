@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -25,22 +26,34 @@ func main() {
 	if str := os.Getenv("GOLINE"); str != "" {
 		fl, err := strconv.ParseInt(str, 10, 64)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "GOLINE parse failed:%s", err.Error())
+			_, _ = fmt.Fprintf(os.Stderr, "GOLINE parser failed:%s", err.Error())
 			os.Exit(1)
 		}
 		fileLine = int(fl)
 	}
+	fmt.Println(fileLine)
+	dir, err := os.Getwd()
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "get working directory failed:%s", err.Error())
+		os.Exit(1)
+	}
 
 	flag.Usage = Usage
 	flag.Parse()
-	err := generate(&GeneratorArg{
-		FileName: fileName,
+
+	srcPkg, srcName := parseSrcDstFlagName(*srcFlag)
+	dstPkg, dstName := parseSrcDstFlagName(*dstFlag)
+	gArg := &GeneratorArg{
+		FileName: dir + "/" + fileName,
 		Line:     fileLine,
-		Src:      *srcFlag,
-		Dst:      *dstFlag,
-	})
+		Src:      srcName,
+		Dst:      dstName,
+		SrcPkg:   srcPkg,
+		DstPkg:   dstPkg,
+	}
+	err = generate(gArg)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "generate failed:%s", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "generate failed:%+v", err)
 		os.Exit(1)
 	}
 
@@ -60,4 +73,13 @@ func generate(arg *GeneratorArg) error {
 		return err
 	}
 	return nil
+}
+
+func parseSrcDstFlagName(s string) (string, string) {
+	ss := strings.Split(s, ".")
+	if len(ss) == 1 {
+		return "", ss[0]
+	} else {
+		return ss[0], ss[1]
+	}
 }

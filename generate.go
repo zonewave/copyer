@@ -7,12 +7,15 @@ import (
 	"text/template"
 
 	"github.com/cockroachdb/errors"
+	"github.com/zonewave/copyer/parser"
+	"github.com/zonewave/copyer/xast"
+	"github.com/zonewave/copyer/xtemplate"
 	"golang.org/x/tools/go/packages"
 )
 
 // Generator is a code generator
 type Generator struct {
-	Param *TemplateParam
+	Param *xtemplate.CopyParam
 	Tmpl  *template.Template
 	Out   io.Writer
 }
@@ -20,6 +23,8 @@ type Generator struct {
 type GeneratorArg struct {
 	FileName       string
 	Src            string
+	SrcPkg         string
+	DstPkg         string
 	Dst            string
 	Line           int
 	LoadConfigOpts []func(*packages.Config)
@@ -29,26 +34,26 @@ type GeneratorArg struct {
 func NewGenerator(arg *GeneratorArg) (*Generator, error) {
 
 	// load ast.pkgs
-	pkgs, err := loadPkgs([]string{"./..."}, arg.LoadConfigOpts...)
+	pkg, err := xast.LoadLocalPkg(arg.LoadConfigOpts...)
 	if err != nil {
 		return nil, err
 	}
 
-	// load template
-	tmpl, err := newCopyTemplate()
+	// load templates
+	tmpl, err := xtemplate.NewCopyTemplate()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	// parse template paramr
-	tmplParam, err := parseTemplateParam(arg.Src, arg.Dst, pkgs)
+	// parser templates param
+	tmplParam, err := parser.ParseTemplateParam(arg.FileName, arg.SrcPkg, arg.Src, arg.DstPkg, arg.Dst, pkg)
 	if err != nil {
 		return nil, err
 	}
 	g := newGenerate(tmplParam, tmpl, NewOutput(arg.FileName, arg.Line))
 	return g, nil
 }
-func newGenerate(param *TemplateParam, tmpl *template.Template, out io.Writer) *Generator {
+func newGenerate(param *xtemplate.CopyParam, tmpl *template.Template, out io.Writer) *Generator {
 	return &Generator{Param: param, Tmpl: tmpl, Out: out}
 }
 
@@ -63,7 +68,7 @@ func (g *Generator) Generate() ([]byte, error) {
 	var buf bytes.Buffer
 	err := g.Tmpl.Execute(&buf, g.Param)
 	if err != nil {
-		return nil, errors.Wrapf(err, "execute template %s", g.Tmpl.Name())
+		return nil, errors.Wrapf(err, "execute templates %s", g.Tmpl.Name())
 	}
 	bs, err := format.Source(buf.Bytes())
 	if err != nil {

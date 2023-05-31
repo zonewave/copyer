@@ -1,0 +1,7 @@
+func Copy{{.Src.TypeNameNoDot}}To{{.Dst.TypeNameNoDot}}({{.Src.Name}} *{{.Src.Type}}, {{.Dst.Name}} *{{.Dst.Type}}) {
+{{- range $name,$value := .Dst.StructType.Fields -}}
+    {{- if hasField $.Src $name -}}
+        dst.{{$name}} = src.{{$name}}
+    {{end -}}
+{{end -}}
+}

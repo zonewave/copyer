@@ -4,8 +4,10 @@ go 1.18
 
 require (
 	github.com/cockroachdb/errors v1.9.1
+	github.com/hashicorp/go-set v0.1.13
 	github.com/smartystreets/goconvey v1.8.0
-	github.com/zonewave/pkgs v1.0.1-0.20230521073352-cbdf1e3ea97a
+	github.com/zonewave/pkgs v1.0.1-0.20230526102530-f6b954ffd5e4
+	golang.org/x/text v0.7.0
 	golang.org/x/tools v0.9.1
 )
 
