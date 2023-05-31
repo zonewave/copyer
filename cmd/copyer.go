@@ -1,26 +1,15 @@
-package main
+package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+
+	generate2 "github.com/zonewave/copyer/generate"
 )
 
-var (
-	srcFlag = flag.String("src", "", "src type name")
-	dstFlag = flag.String("dst", "", "dst type name")
-)
-
-func Usage() {
-	fmt.Fprintf(os.Stderr, "Usage of copyer:\n")
-	fmt.Fprintf(os.Stderr, "\tcopyer [flags] -src typename")
-	fmt.Fprintf(os.Stderr, "\tcopyer [flags] -dst typename")
-	fmt.Fprintf(os.Stderr, "Flags:\n")
-	flag.PrintDefaults()
-}
-func main() {
+func Copyer(srcFlag, dstFlag string) {
 	fileName := os.Getenv("GOFILE")
 	var fileLine int
 	if str := os.Getenv("GOLINE"); str != "" {
@@ -31,19 +20,17 @@ func main() {
 		}
 		fileLine = int(fl)
 	}
-	fmt.Println(fileLine)
 	dir, err := os.Getwd()
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "get working directory failed:%s", err.Error())
 		os.Exit(1)
 	}
 
-	flag.Usage = Usage
-	flag.Parse()
+	//flag.Usage = Usage
 
-	srcPkg, srcName := parseSrcDstFlagName(*srcFlag)
-	dstPkg, dstName := parseSrcDstFlagName(*dstFlag)
-	gArg := &GeneratorArg{
+	srcPkg, srcName := parseSrcDstFlagName(srcFlag)
+	dstPkg, dstName := parseSrcDstFlagName(dstFlag)
+	gArg := &generate2.GeneratorArg{
 		FileName: dir + "/" + fileName,
 		Line:     fileLine,
 		Src:      srcName,
@@ -59,8 +46,8 @@ func main() {
 
 }
 
-func generate(arg *GeneratorArg) error {
-	g, err := NewGenerator(arg)
+func generate(arg *generate2.GeneratorArg) error {
+	g, err := generate2.NewGenerator(arg)
 	if err != nil {
 		return err
 	}

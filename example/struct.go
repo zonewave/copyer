@@ -26,24 +26,10 @@ type Bar struct {
 	Foo       *Foo
 }
 
-//go:generate ../bin/copyer -src=Foo -dst=Bar
-func CopyFooToBar(src *Foo, dst *Bar) {
-	dst.Foo = src.Foo
-	dst.Maps = src.Maps
-	dst.Name = src.Name
-	dst.Number = src.Number
-	dst.Slices = src.Slices
-	dst.SlicesPtr = src.SlicesPtr
-}
+//go:generate ../bin/copyer --src=Foo --dst=Bar
 
-//go:generate ../bin/copyer -src=internal.Foo -dst=Bar
-func CopyInternalFooToBar(src *internal.Foo, dst *Bar) {
-	dst.Maps = src.Maps
-	dst.Name = src.Name
-	dst.Number = src.Number
-	dst.Slices = src.Slices
-	dst.SlicesPtr = src.SlicesPtr
-}
+//go:generate ../bin/copyer -s internal.Foo -d Bar
+
 var _ in2.Foo
 var _ internal.Foo
 var _ strings.Builder

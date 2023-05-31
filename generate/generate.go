@@ -1,4 +1,4 @@
-package main
+package generate
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/cockroachdb/errors"
+	"github.com/zonewave/copyer/output"
 	"github.com/zonewave/copyer/parser"
 	"github.com/zonewave/copyer/xast"
 	"github.com/zonewave/copyer/xtemplate"
@@ -50,7 +51,7 @@ func NewGenerator(arg *GeneratorArg) (*Generator, error) {
 	if err != nil {
 		return nil, err
 	}
-	g := newGenerate(tmplParam, tmpl, NewOutput(arg.FileName, arg.Line))
+	g := newGenerate(tmplParam, tmpl, output.NewOutput(arg.FileName, arg.Line))
 	return g, nil
 }
 func newGenerate(param *xtemplate.CopyParam, tmpl *template.Template, out io.Writer) *Generator {
