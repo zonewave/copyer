@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/cockroachdb/errors"
-	generate2 "github.com/zonewave/copyer/generate"
+	generate "github.com/zonewave/copyer/generate"
 )
 
-func Copyer(srcFlag, dstFlag string) error {
+func LocalCopy(flag *RootCmdFlag) error {
 	fileName := os.Getenv("GOFILE")
 	var fileLine int
 	if str := os.Getenv("GOLINE"); str != "" {
@@ -23,9 +23,9 @@ func Copyer(srcFlag, dstFlag string) error {
 	if err != nil {
 		return errors.Wrap(err, "get working directory failed:%s")
 	}
-	srcPkg, srcName := parseSrcDstFlagName(srcFlag)
-	dstPkg, dstName := parseSrcDstFlagName(dstFlag)
-	gArg := &generate2.GeneratorArg{
+	srcPkg, srcName := parseSrcDstFlagName(flag.Src)
+	dstPkg, dstName := parseSrcDstFlagName(flag.Dst)
+	gArg := &generate.GeneratorArg{
 		FileName: dir + "/" + fileName,
 		Line:     fileLine,
 		Src:      srcName,
@@ -33,15 +33,15 @@ func Copyer(srcFlag, dstFlag string) error {
 		SrcPkg:   srcPkg,
 		DstPkg:   dstPkg,
 	}
-	err = generate(gArg)
+	err = generateCode(gArg)
 	if err != nil {
 		return errors.Wrap(err, "generate failed")
 	}
 	return nil
 }
 
-func generate(arg *generate2.GeneratorArg) error {
-	g, err := generate2.NewGenerator(arg)
+func generateCode(arg *generate.GeneratorArg) error {
+	g, err := generate.NewGenerator(arg)
 	if err != nil {
 		return err
 	}

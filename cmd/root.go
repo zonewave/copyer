@@ -10,29 +10,22 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "copyer",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "copyer is a tool to generate the copy code for golang",
+	Long:  `copyer is a tool to generate the copy code for golang.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logrus.Info("copyer is starting...")
-		src, _ := cmd.Flags().GetString("src")
-		dst, _ := cmd.Flags().GetString("dst")
-
-		err := Copyer(src, dst)
+		cmdFlag, err := RootCmdFlagGet(cmd)
+		if err != nil {
+			logrus.Errorf("RootCmdFlagGet error:%v", err)
+			return
+		}
+		err = LocalCopy(cmdFlag)
 		if err != nil {
 			logrus.Errorf("copyer error:%+v", err)
 		}
 
 		logrus.WithFields(logrus.Fields{
-			"src": src,
-			"dst": dst,
+			"flags": cmdFlag,
 		}).Info("copyer is end...")
 	},
 }
@@ -48,14 +41,16 @@ func Execute() {
 
 func init() {
 	initLogrus()
-	flags := rootCmd.Flags()
+	flags := rootCmd.PersistentFlags()
 	flags.StringP("src", "s", "", "src type name")
 	flags.StringP("dst", "d", "", "dst type name")
-	flags.StringP("output", "o", "", `
-		output file name, default is copy_[src]_[dst].go;
-		if output=="local" ，output to on the line of the file where the gender command resides`)
+	flags.BoolP("print", "p", false, "print the copy code")
 
+	rootCmd.AddCommand(outfileCmd)
+	outfileCmd.Flags().StringP("out", "o", "", "out file name;default,it is copy_{{dst}}.go")
+	outfileCmd.Flags().String("package", "", "package name;default, it is current packageName")
 }
+
 func initLogrus(opts ...func()) {
 	// Log as JSON instead of the default ASCII formatter.
 	logrus.SetFormatter(&logrus.TextFormatter{})
