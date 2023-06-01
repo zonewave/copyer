@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -21,10 +21,19 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	Run: func(cmd *cobra.Command, args []string) {
+		logrus.Info("copyer is starting...")
 		src, _ := cmd.Flags().GetString("src")
 		dst, _ := cmd.Flags().GetString("dst")
-		fmt.Println(src, dst)
-		Copyer(src, dst)
+
+		err := Copyer(src, dst)
+		if err != nil {
+			logrus.Errorf("copyer error:%+v", err)
+		}
+
+		logrus.WithFields(logrus.Fields{
+			"src": src,
+			"dst": dst,
+		}).Info("copyer is end...")
 	},
 }
 
@@ -38,6 +47,7 @@ func Execute() {
 }
 
 func init() {
+	initLogrus()
 	flags := rootCmd.Flags()
 	flags.StringP("src", "s", "", "src type name")
 	flags.StringP("dst", "d", "", "dst type name")
@@ -45,4 +55,12 @@ func init() {
 		output file name, default is copy_[src]_[dst].go;
 		if output=="local" ，output to on the line of the file where the gender command resides`)
 
+}
+func initLogrus(opts ...func()) {
+	// Log as JSON instead of the default ASCII formatter.
+	logrus.SetFormatter(&logrus.TextFormatter{})
+	logrus.SetOutput(os.Stdout)
+	for _, opt := range opts {
+		opt()
+	}
 }

@@ -1,33 +1,28 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/cockroachdb/errors"
 	generate2 "github.com/zonewave/copyer/generate"
 )
 
-func Copyer(srcFlag, dstFlag string) {
+func Copyer(srcFlag, dstFlag string) error {
 	fileName := os.Getenv("GOFILE")
 	var fileLine int
 	if str := os.Getenv("GOLINE"); str != "" {
 		fl, err := strconv.ParseInt(str, 10, 64)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "GOLINE parser failed:%s", err.Error())
-			os.Exit(1)
+			return errors.Wrap(err, "go line parser failed:%s")
 		}
 		fileLine = int(fl)
 	}
 	dir, err := os.Getwd()
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "get working directory failed:%s", err.Error())
-		os.Exit(1)
+		return errors.Wrap(err, "get working directory failed:%s")
 	}
-
-	//flag.Usage = Usage
-
 	srcPkg, srcName := parseSrcDstFlagName(srcFlag)
 	dstPkg, dstName := parseSrcDstFlagName(dstFlag)
 	gArg := &generate2.GeneratorArg{
@@ -40,10 +35,9 @@ func Copyer(srcFlag, dstFlag string) {
 	}
 	err = generate(gArg)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "generate failed:%+v", err)
-		os.Exit(1)
+		return errors.Wrap(err, "generate failed")
 	}
-
+	return nil
 }
 
 func generate(arg *generate2.GeneratorArg) error {

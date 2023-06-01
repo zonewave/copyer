@@ -29,6 +29,12 @@ func (t *TmplStruct) HasField(name string) bool {
 	return false
 }
 
+//go:generate copyer -s TmplStruct -d TmplStruct
+func CopyTmplStructToTmplStruct(src *TmplStruct, dst *TmplStruct) {
+	dst.Fields = src.Fields
+	dst.Name = src.Name
+}
+
 func HasField(src *TmplVar, name string) bool {
 	return src.StructType.HasField(name)
 }
