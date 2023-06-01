@@ -1,5 +1,12 @@
 package xtemplate
 
+type ImplImportParam struct {
+	Alias   string
+	PkgPath string
+}
+type TmplImports struct {
+	Imports []*ImplImportParam
+}
 type TmplVar struct {
 	Name          string
 	TypeNameNoDot string
@@ -42,6 +49,12 @@ func HasField(src *TmplVar, name string) bool {
 type CopyParam struct {
 	Src *TmplVar
 	Dst *TmplVar
+}
+
+type FileParam struct {
+	PackageName string
+	Imports     *TmplImports
+	Param       *CopyParam
 }
 
 func NewTemplateParam(src, dst *TmplVar) *CopyParam {

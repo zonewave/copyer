@@ -1,5 +1,7 @@
 {{- define "outfile"}}
-{{ template "import" .Import}}
+package {{ .PackageName }}
 
-{{ template "copy" .Param}}
+{{ template "import" .Imports}}
+
+{{ template "copyFunc" .Param}}
 {{end}}

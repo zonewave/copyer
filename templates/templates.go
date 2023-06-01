@@ -2,6 +2,7 @@ package templates
 
 import (
 	"embed"
+	"fmt"
 )
 
 //go:embed "*.gotmpl"
@@ -24,5 +25,5 @@ func (t TmplName) FileName() string {
 }
 
 func (t TmplName) Template() string {
-	return `{{template "copyFunc" . }}`
+	return fmt.Sprintf(`{{template "%s" . }}`, t.String())
 }

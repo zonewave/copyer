@@ -1,4 +1,8 @@
 {{- define "import" }}
-package {{.PackageName}}
 
+import (
+    {{- range .Imports }}
+        {{.Alias}} "{{.PkgPath}}"
+    {{end}}
+)
 {{end}}
