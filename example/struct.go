@@ -26,25 +26,9 @@ type Bar struct {
 	Foo       *Foo
 }
 
-func CopyFooToBar(src *Foo, dst *Bar) {
-	dst.Foo = src.Foo
-	dst.Maps = src.Maps
-	dst.Name = src.Name
-	dst.Number = src.Number
-	dst.Slices = src.Slices
-	dst.SlicesPtr = src.SlicesPtr
-}
-func CopyFooToBar(src *Foo, dst *Bar) {
-	dst.Foo = src.Foo
-	dst.Maps = src.Maps
-	dst.Name = src.Name
-	dst.Number = src.Number
-	dst.Slices = src.Slices
-	dst.SlicesPtr = src.SlicesPtr
-}
-//go:generate copyer local --src=Foo --dst=Bar
+//go:generate copyer  --src=Foo --dst=Bar
+//go:generate copyer  -s internal.Foo -d Bar
 
-//go:generate copyer outfile -s internal.Foo -d Bar
 var _ in2.Foo
 var _ internal.Foo
 var _ strings.Builder

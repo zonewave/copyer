@@ -17,9 +17,11 @@ func getString(set *pflag.FlagSet, name string) (string, error) {
 }
 
 type RootCmdFlag struct {
-	Src   string
-	Dst   string
-	Print bool
+	Src             string
+	Dst             string
+	SrcPkg, SrcType string
+	DstPkg, DstType string
+	Print           bool
 }
 
 func (r *RootCmdFlag) String() string {
@@ -38,14 +40,20 @@ func RootCmdFlagGet(cmd *cobra.Command) (*RootCmdFlag, error) {
 	if err != nil {
 		return nil, err
 	}
+	srcPkg, srcType := parseSrcDstFlagName(src)
+	dstPkg, dstType := parseSrcDstFlagName(dst)
 	printOut, err := flags.GetBool("print")
 	if err != nil {
 		return nil, errors.Wrapf(err, "get print flag failed")
 	}
 	return &RootCmdFlag{
-		Src:   src,
-		Dst:   dst,
-		Print: printOut,
+		Src:     src,
+		Dst:     dst,
+		SrcPkg:  srcPkg,
+		SrcType: srcType,
+		DstPkg:  dstPkg,
+		DstType: dstType,
+		Print:   printOut,
 	}, nil
 }
 

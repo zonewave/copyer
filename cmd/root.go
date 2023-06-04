@@ -11,7 +11,8 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "copyer",
 	Short: "copyer is a tool to generate the copy code for golang",
-	Long:  `copyer is a tool to generate the copy code for golang.`,
+	// TODO: add long description
+	Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		logrus.Info("copyer is starting...")
 		cmdFlag, err := RootCmdFlagGet(cmd)
@@ -19,7 +20,12 @@ var rootCmd = &cobra.Command{
 			logrus.Errorf("RootCmdFlagGet error:%v", err)
 			return
 		}
-		err = LocalCopy(cmdFlag)
+		env, err := NewEnv()
+		if err != nil {
+			logrus.Errorf("Env error:%v", err)
+			return
+		}
+		err = LocalCopy(cmdFlag, env)
 		if err != nil {
 			logrus.Errorf("copyer error:%+v", err)
 		}

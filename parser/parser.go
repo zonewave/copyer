@@ -2,20 +2,33 @@ package parser
 
 import (
 	"github.com/cockroachdb/errors"
+	"github.com/zonewave/copyer/common"
 	"github.com/zonewave/copyer/xast"
 	"github.com/zonewave/copyer/xtemplate"
 	"golang.org/x/tools/go/packages"
 )
 
+type ParseTemplateParamArg struct {
+	Action      common.ActionType
+	FileName    string
+	SrcName     string
+	SrcPkg      string
+	SrcTypeName string
+	DstName     string
+	DstPkg      string
+	DstTypeName string
+	Pkg         *packages.Package
+}
+
 // ParseTemplateParam parses templates param
-func ParseTemplateParam(fileName, srcPkg, srcTypeName, dstPkg, dstTypeName string, pkg *packages.Package) (*xtemplate.CopyParam, error) {
-	file, err := xast.FindAstFile(pkg, fileName)
+func ParseTemplateParam(arg *ParseTemplateParamArg) (*xtemplate.CopyParam, error) {
+	file, err := xast.FindAstFile(arg.Pkg, arg.FileName)
 	if err != nil {
 		return nil, err
 	}
-	varSpecs, err := xast.VarSpecLocalParseMust(pkg, file,
-		xast.NewFindVarDataSpecPair("src", srcPkg, srcTypeName),
-		xast.NewFindVarDataSpecPair("dst", dstPkg, dstTypeName))
+	varSpecs, err := xast.VarSpecLocalParseMust(arg.Pkg, file,
+		xast.NewFindVarDataSpecPair(arg.SrcName, arg.SrcPkg, arg.SrcTypeName),
+		xast.NewFindVarDataSpecPair(arg.DstName, arg.DstPkg, arg.DstTypeName))
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +41,5 @@ func ParseTemplateParam(fileName, srcPkg, srcTypeName, dstPkg, dstTypeName strin
 	if !ok {
 		return nil, errors.Errorf("dst %s not found", dst)
 	}
-	return xtemplate.NewTemplateParam(parseVar(pkg, src), parseVar(pkg, dst)), nil
+	return xtemplate.NewTemplateParam(parseVar(arg.Pkg, src), parseVar(arg.Pkg, dst)), nil
 }
-
-// parseTypeSecStructs parses map[string]ast.TypeSpecs to map[string]TemplateStructs

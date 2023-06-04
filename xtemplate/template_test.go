@@ -61,7 +61,7 @@ func Test_CopyTemplate(t *testing.T) {
 
 func Test_NewOutPutTemplate(t *testing.T) {
 	c.Convey("Test_CopyTemplate", t, func() {
-		tmpl, err := NewOutPutTemplate()
+		tmpl, err := NewOutPutFileTemplate()
 		c.So(err, c.ShouldBeNil)
 
 		tmplStructS := &TmplStruct{

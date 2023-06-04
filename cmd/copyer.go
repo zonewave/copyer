@@ -2,36 +2,34 @@ package cmd
 
 import (
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/cockroachdb/errors"
+	"github.com/zonewave/copyer/common"
 	generate "github.com/zonewave/copyer/generate"
 )
 
-func LocalCopy(flag *RootCmdFlag) error {
-	fileName := os.Getenv("GOFILE")
-	var fileLine int
-	if str := os.Getenv("GOLINE"); str != "" {
-		fl, err := strconv.ParseInt(str, 10, 64)
-		if err != nil {
-			return errors.Wrap(err, "go line parser failed:%s")
-		}
-		fileLine = int(fl)
-	}
+func LocalCopy(flag *RootCmdFlag, env *Env) error {
+
 	dir, err := os.Getwd()
 	if err != nil {
 		return errors.Wrap(err, "get working directory failed:%s")
 	}
-	srcPkg, srcName := parseSrcDstFlagName(flag.Src)
-	dstPkg, dstName := parseSrcDstFlagName(flag.Dst)
+
 	gArg := &generate.GeneratorArg{
-		FileName: dir + "/" + fileName,
-		Line:     fileLine,
-		Src:      srcName,
-		Dst:      dstName,
-		SrcPkg:   srcPkg,
-		DstPkg:   dstPkg,
+		Action:         common.Local,
+		GoFile:         dir + "/" + env.GoFile,
+		GoLine:         env.GoLine,
+		OutFile:        dir + "/" + env.GoFile,
+		OutLine:        env.GoLine,
+		SrcName:        "src",
+		SrcType:        flag.SrcType,
+		SrcPkg:         flag.SrcPkg,
+		DstName:        "dst",
+		DstPkg:         flag.DstPkg,
+		DstType:        flag.DstType,
+		LoadConfigOpts: nil,
+		Print:          false,
 	}
 	err = generateCode(gArg)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"go/format"
 	"io"
+	"os"
 	"text/template"
 
 	"github.com/cockroachdb/errors"
@@ -11,7 +12,6 @@ import (
 	"github.com/zonewave/copyer/parser"
 	"github.com/zonewave/copyer/xast"
 	"github.com/zonewave/copyer/xtemplate"
-	"golang.org/x/tools/go/packages"
 )
 
 // Generator is a code generator
@@ -19,16 +19,6 @@ type Generator struct {
 	Param *xtemplate.CopyParam
 	Tmpl  *template.Template
 	Out   io.Writer
-}
-
-type GeneratorArg struct {
-	FileName       string
-	Src            string
-	SrcPkg         string
-	DstPkg         string
-	Dst            string
-	Line           int
-	LoadConfigOpts []func(*packages.Config)
 }
 
 // NewGenerator creates a new generator
@@ -41,17 +31,34 @@ func NewGenerator(arg *GeneratorArg) (*Generator, error) {
 	}
 
 	// load templates
-	tmpl, err := xtemplate.NewCopyTemplate()
+	tmpl, err := xtemplate.NewTmpl(arg.Action)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
 	// parser templates param
-	tmplParam, err := parser.ParseTemplateParam(arg.FileName, arg.SrcPkg, arg.Src, arg.DstPkg, arg.Dst, pkg)
+	tmplParam, err := parser.ParseTemplateParam(&parser.ParseTemplateParamArg{
+		Action:      arg.Action,
+		FileName:    arg.GoFile,
+		SrcName:     arg.SrcName,
+		SrcPkg:      arg.SrcPkg,
+		SrcTypeName: arg.SrcType,
+		DstName:     arg.DstName,
+		DstPkg:      arg.DstPkg,
+		DstTypeName: arg.DstType,
+		Pkg:         pkg,
+	})
 	if err != nil {
 		return nil, err
 	}
-	g := newGenerate(tmplParam, tmpl, output.NewOutput(arg.FileName, arg.Line))
+	// output
+	var outPut io.Writer
+	if arg.Print {
+		outPut = os.Stdout
+	} else {
+		outPut = output.NewOutput(arg.OutFile, arg.OutLine)
+	}
+	g := newGenerate(tmplParam, tmpl, outPut)
 	return g, nil
 }
 func newGenerate(param *xtemplate.CopyParam, tmpl *template.Template, out io.Writer) *Generator {
