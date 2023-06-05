@@ -25,7 +25,7 @@ type Generator struct {
 func NewGenerator(arg *GeneratorArg) (*Generator, error) {
 
 	// load ast.pkgs
-	pkg, err := xast.LoadLocalPkg(arg.LoadConfigOpts...)
+	pkg, err := xast.LoadLocalPkg(arg.GoPkg, arg.LoadConfigOpts...)
 	if err != nil {
 		return nil, err
 	}

@@ -72,7 +72,6 @@ func VarSpecLocalParse(pkg *packages.Package, file *ast.File, pairs ...*FindVarD
 			AstSpec:         astSpec,
 		}
 	}
-	//pkgsSet:=mapset.NewSetWithSize(len(pairs))
 
 	localNamesFilter := func(pair *FindVarDataSpecPair) bool { return pair.pkgName == "" }
 	// local
@@ -211,15 +210,22 @@ func loadPkgs(patterns []string, opts ...func(config *packages.Config)) ([]*pack
 	return allPkgs, nil
 }
 
-func LoadLocalPkg(opts ...func(config *packages.Config)) (*packages.Package, error) {
+func LoadLocalPkg(pkgName string, opts ...func(config *packages.Config)) (*packages.Package, error) {
 	pkgs, err := loadPkgs([]string{"./"}, opts...)
 	if err != nil {
 		return nil, err
 	}
-	if len(pkgs) != 1 {
-		return nil, errors.Errorf("must only load 1 Pkgs ,but load :%d packages", len(pkgs))
+	var localPkg *packages.Package
+	for _, pkg := range pkgs {
+		if pkg.Name == pkgName {
+			localPkg = pkg
+			break
+		}
 	}
-	return pkgs[0], nil
+	if localPkg == nil {
+		return nil, errors.New("must load local pkg")
+	}
+	return localPkg, nil
 }
 
 func getFileName(pkg *packages.Package, file *ast.File) string {

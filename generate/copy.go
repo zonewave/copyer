@@ -9,6 +9,7 @@ type GeneratorArg struct {
 	Action         common.ActionType
 	GoFile         string
 	GoLine         int
+	GoPkg          string
 	OutFile        string
 	OutLine        int
 	SrcName        string

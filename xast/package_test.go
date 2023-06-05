@@ -1,6 +1,7 @@
 package xast
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -49,14 +50,16 @@ func Test_loadPkgs(t *testing.T) {
 }
 
 func Test_findTypeSpec(t *testing.T) {
+	pkgs, _ := loadPkgs([]string{"./..."}, loadTestCfg)
+	dir, _ := os.Getwd()
 	c.Convey("Test_findTypeSpec", t, func() {
-		pkgs, err := loadPkgs([]string{"./..."}, loadTestCfg)
+		ret, err := FindAstFile(pkgs[0], dir+"/package.go")
 		c.So(err, c.ShouldBeNil)
-		c.So(pkgs, c.ShouldNotBeEmpty)
-
-		ret := findTypeSpec(pkgs, []string{"A", "B"})
 		c.So(ret, c.ShouldNotBeEmpty)
-		c.So(ret["A"].Name.Name, c.ShouldEqual, "A")
-		c.So(ret["B"].Name.Name, c.ShouldEqual, "B")
+
+	})
+	c.Convey("Test_findTypeSpec failed", t, func() {
+		_, err := FindAstFile(pkgs[0], "/package.go")
+		c.So(err, c.ShouldBeError)
 	})
 }

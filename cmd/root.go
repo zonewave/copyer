@@ -25,6 +25,11 @@ var rootCmd = &cobra.Command{
 			logrus.Errorf("Env error:%v", err)
 			return
 		}
+
+		logrus.WithFields(logrus.Fields{
+			"flags": cmdFlag,
+			"env":   env,
+		}).Info("copyer load flag and env...")
 		err = LocalCopy(cmdFlag, env)
 		if err != nil {
 			logrus.Errorf("copyer error:%+v", err)
@@ -32,6 +37,7 @@ var rootCmd = &cobra.Command{
 
 		logrus.WithFields(logrus.Fields{
 			"flags": cmdFlag,
+			"env":   env,
 		}).Info("copyer is end...")
 	},
 }

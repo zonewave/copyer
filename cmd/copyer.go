@@ -20,6 +20,7 @@ func LocalCopy(flag *RootCmdFlag, env *Env) error {
 		Action:         common.Local,
 		GoFile:         dir + "/" + env.GoFile,
 		GoLine:         env.GoLine,
+		GoPkg:          env.GoPackage,
 		OutFile:        dir + "/" + env.GoFile,
 		OutLine:        env.GoLine,
 		SrcName:        "src",
