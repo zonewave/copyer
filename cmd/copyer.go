@@ -11,7 +11,9 @@ import (
 	"github.com/zonewave/copyer/xutil"
 )
 
-func LocalCopy(flag *RootCmdFlag, env *Env) mo.Result[bool] {
+func LocalCopy(param *RootParam) error {
+	env := param.Env
+	flag := param.CmdFlag
 	dir := mo.TupleToResult(os.Getwd()).
 		MapErr(xutil.MapWrap[string]("get current dir error"))
 
@@ -33,7 +35,7 @@ func LocalCopy(flag *RootCmdFlag, env *Env) mo.Result[bool] {
 			Print:          false,
 		}
 	})
-	return xutil.FlatMap(gArg, generateCode)
+	return xutil.FlatMap(gArg, generateCode).Error()
 }
 
 func generateCode(arg *generate.GeneratorArg) mo.Result[bool] {

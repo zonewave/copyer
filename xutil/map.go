@@ -45,6 +45,19 @@ func Map2[T1, T2, V any](m1 mo.Result[T1], m2 mo.Result[T2], fn func(T1, T2) V) 
 	}
 	return mo.Ok(fn(m1.MustGet(), m2.MustGet()))
 }
+
+func Map3[T1, T2, T3, V any](m1 mo.Result[T1], m2 mo.Result[T2], m3 mo.Result[T3], fn func(T1, T2, T3) V) mo.Result[V] {
+	if m1.IsError() {
+		return mo.Err[V](m1.Error())
+	}
+	if m2.IsError() {
+		return mo.Err[V](m2.Error())
+	}
+	if m3.IsError() {
+		return mo.Err[V](m3.Error())
+	}
+	return mo.Ok(fn(m1.MustGet(), m2.MustGet(), m3.MustGet()))
+}
 func Map2E[T1, T2, V any](m1 mo.Result[T1], m2 mo.Result[T2], fn func(T1, T2) (V, error)) mo.Result[V] {
 	if m1.IsError() {
 		return mo.Err[V](m1.Error())

@@ -11,7 +11,7 @@ var outfileCmd = &cobra.Command{
 	Long:  `copyer is a tool to generate the copy code for golang.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logrus.Info("copyer outfile is starting...")
-		cmdFlag, err := OutfileCmdFlagGet(cmd)
+		cmdFlag, err := OutfileCmdFlagGet(cmd).Get()
 		if err != nil {
 			logrus.Errorf("RootCmdFlagGet error:%v", err)
 			return

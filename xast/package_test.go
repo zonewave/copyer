@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/duke-git/lancet/v2/slice"
 	c "github.com/smartystreets/goconvey/convey"
-	"github.com/zonewave/pkgs/standutil/sliceutil"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -32,7 +32,7 @@ func Test_loadPkgs(t *testing.T) {
 			c.So(pkgs[0].GoFiles, c.ShouldNotBeEmpty)
 
 			exist := false
-			sliceutil.IterFn(pkgs[0].GoFiles, func(i int, s string) bool {
+			slice.ForEachWithBreak(pkgs[0].GoFiles, func(i int, s string) bool {
 				if strings.Contains(s, "struct.go") {
 					exist = true
 					return false

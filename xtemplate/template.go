@@ -50,17 +50,14 @@ func NewImportTemplate() mo.Result[*template.Template] {
 
 }
 
-func NewOutPutFileTemplate() (*template.Template, error) {
-	tmpl, err := template.New(ts.OutFileTmplName.String()).Funcs(funcsMap).ParseFS(ts.Fs,
+func NewOutPutFileTemplate() mo.Result[*template.Template] {
+	tmpl := mo.TupleToResult(template.New(ts.OutFileTmplName.String()).Funcs(funcsMap).ParseFS(ts.Fs,
 		ts.CopyTmplName.FileName(),
 		ts.ImportTmplName.FileName(),
-		ts.OutFileTmplName.FileName())
-	if err != nil {
-		return nil, err
-	}
-	tmpl2, err := tmpl.New("generate file").Funcs(funcsMap).Parse(ts.OutFileTmplName.Template())
-	if err != nil {
-		return nil, err
-	}
-	return tmpl2, nil
+		ts.OutFileTmplName.FileName()))
+
+	return tmpl.Map(func(tmpl *template.Template) (*template.Template, error) {
+		return tmpl.New("generate file").Funcs(funcsMap).Parse(ts.OutFileTmplName.Template())
+	})
+
 }

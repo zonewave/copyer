@@ -15,30 +15,23 @@ var rootCmd = &cobra.Command{
 	Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		logrus.Info("copyer is starting...")
-		cmdFlag, err := RootCmdFlagGet(cmd)
+
+		param, err := NewRootParam(cmd).Get()
 		if err != nil {
 			logrus.Errorf("RootCmdFlagGet error:%v", err)
 			return
 		}
-		env, err := NewEnv()
+
+		logrus.WithFields(logrus.Fields{
+			"param": param,
+		}).Info("copyer load flag and env...")
+		err = LocalCopy(param)
 		if err != nil {
-			logrus.Errorf("Env error:%v", err)
+			logrus.Errorf("copyer error:%+v", err)
 			return
 		}
-
-		logrus.WithFields(logrus.Fields{
-			"flags": cmdFlag,
-			"env":   env,
-		}).Info("copyer load flag and env...")
-		ret := LocalCopy(cmdFlag, env)
-		if ret.IsError() {
-			logrus.Errorf("copyer error:%+v", ret.Error())
-		}
-
-		logrus.WithFields(logrus.Fields{
-			"flags": cmdFlag,
-			"env":   env,
-		}).Info("copyer is end...")
+		logrus.Info("copyer is end...")
+		return
 	},
 }
 
