@@ -10,7 +10,7 @@ import (
 
 func Test_CopyTemplate(t *testing.T) {
 	c.Convey("Test_CopyTemplate", t, func() {
-		tmpl, err := NewCopyTemplate()
+		tmpl, err := NewCopyTemplate().Get()
 		c.So(err, c.ShouldBeNil)
 
 		var buf bytes.Buffer
