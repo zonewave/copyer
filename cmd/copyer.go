@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"io"
 	"os"
 	"strings"
 
@@ -41,14 +40,16 @@ func generateCode(arg *generate.GeneratorArg) mo.Result[bool] {
 	g := generate.NewGenerator(arg)
 	bs := xutil.FlatMap(g, generate.ProduceCode)
 
-	return xutil.FlatMap2(bs, mo.Ok(OutPutGet(arg)), generate.OutPut)
+	return xutil.FlatMap2(bs, mo.Ok(OutPutGet(arg)), func(bs []byte, out output.Writer) mo.Result[bool] {
+		return generate.OutPut(arg.GoLine, bs, out)
+	})
 
 }
-func OutPutGet(arg *generate.GeneratorArg) io.Writer {
+func OutPutGet(arg *generate.GeneratorArg) output.Writer {
 	if arg.Print {
-		return os.Stdout
+		return output.NewStdout()
 	} else {
-		return output.NewOutput(arg.OutFile, arg.OutLine)
+		return output.NewFile(arg.OutFile)
 	}
 }
 func parseSrcDstFlagName(s string) (string, string) {

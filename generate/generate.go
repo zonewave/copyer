@@ -3,11 +3,11 @@ package generate
 import (
 	"bytes"
 	"go/format"
-	"io"
 	"text/template"
 
 	"github.com/cockroachdb/errors"
 	"github.com/samber/mo"
+	"github.com/zonewave/copyer/output"
 	"github.com/zonewave/copyer/parser"
 	"github.com/zonewave/copyer/xast"
 	"github.com/zonewave/copyer/xtemplate"
@@ -59,9 +59,11 @@ func newGenerate(tmpl *template.Template, param *xtemplate.CopyParam) *Generator
 }
 
 // OutPut is a wrapper of io.Writer
-func OutPut(bs []byte, out io.Writer) mo.Result[bool] {
-	_, e := out.Write(bs)
-	return mo.TupleToResult(true, e)
+func OutPut(fileLine int, bs []byte, out output.Writer) mo.Result[bool] {
+	return mo.TupleToResult(true, out.LineDataBatchInsert(&output.LinesData{
+		StartLine: fileLine,
+		Bytes:     bs,
+	}))
 }
 
 func ProduceCode(g *Generator) mo.Result[[]byte] {
