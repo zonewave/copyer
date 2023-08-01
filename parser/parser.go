@@ -21,10 +21,20 @@ type ParseTemplateParamArg struct {
 	DstPkg      string
 	DstTypeName string
 	Pkg         *packages.Package
+	FuncLine    int
+}
+type ParseTemplateParamResult struct {
+	TmplParam  *xtemplate.FileParam
+	ImportLine int
+	FuncLine   int
+}
+
+func NewParseTemplateParamResult(tmplParam *xtemplate.FileParam, importLine, funcLine int) *ParseTemplateParamResult {
+	return &ParseTemplateParamResult{TmplParam: tmplParam, ImportLine: importLine, FuncLine: funcLine}
 }
 
 // ParseTemplateParam parses templates param
-func ParseTemplateParam(arg *ParseTemplateParamArg) mo.Result[*xtemplate.CopyParam] {
+func ParseTemplateParam(arg *ParseTemplateParamArg) mo.Result[*ParseTemplateParamResult] {
 	file := xast.FindAstFile(arg.Pkg, arg.FileName)
 
 	varDataSpec := xutil.FlatMap(
@@ -37,10 +47,12 @@ func ParseTemplateParam(arg *ParseTemplateParamArg) mo.Result[*xtemplate.CopyPar
 		},
 	)
 
-	return xutil.Map(varDataSpec, func(varDataSpec map[string]*xast.VarDataSpec) *xtemplate.CopyParam {
+	return xutil.Map(varDataSpec, func(varDataSpec map[string]*xast.VarDataSpec) *ParseTemplateParamResult {
 		src := varDataSpec[arg.SrcName]
 		dst := varDataSpec[arg.DstName]
-		return xtemplate.NewTemplateParam(parseVar(arg.Pkg, src), parseVar(arg.Pkg, dst))
+		varParam := xtemplate.NewTemplateParam(parseVar(arg.Pkg, src), parseVar(arg.Pkg, dst))
+		fileParam := xtemplate.NewFileParam(varParam)
+		return NewParseTemplateParamResult(fileParam, -1, arg.FuncLine)
 	})
 
 }

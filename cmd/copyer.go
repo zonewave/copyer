@@ -37,8 +37,8 @@ func LocalCopy(flag *RootCmdFlag, env *Env) mo.Result[bool] {
 }
 
 func generateCode(arg *generate.GeneratorArg) mo.Result[bool] {
-	g := generate.NewGenerator(arg)
-	bs := xutil.FlatMap(g, generate.ProduceCode)
+
+	bs := xutil.FlatMap(generate.NewGenerator(arg), generate.ProduceCode)
 
 	return xutil.FlatMap2(bs, mo.Ok(OutPutGet(arg)), func(bs []byte, out output.Writer) mo.Result[bool] {
 		return generate.OutPut(arg.GoLine, bs, out)

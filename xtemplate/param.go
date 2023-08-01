@@ -5,7 +5,8 @@ type ImplImportParam struct {
 	PkgPath string
 }
 type TmplImports struct {
-	Imports []*ImplImportParam
+	ImportDef bool
+	Imports   []*ImplImportParam
 }
 type TmplVar struct {
 	Name          string
@@ -54,12 +55,17 @@ type CopyParam struct {
 type FileParam struct {
 	PackageName string
 	Imports     *TmplImports
-	Param       *CopyParam
+	CopyFunc    *CopyParam
 }
 
 func NewTemplateParam(src, dst *TmplVar) *CopyParam {
 	return &CopyParam{
 		Src: src,
 		Dst: dst,
+	}
+}
+func NewFileParam(copyFunc *CopyParam) *FileParam {
+	return &FileParam{
+		CopyFunc: copyFunc,
 	}
 }

@@ -3,9 +3,7 @@ package xtemplate
 import (
 	"text/template"
 
-	"github.com/cockroachdb/errors"
 	"github.com/samber/mo"
-	"github.com/zonewave/copyer/common"
 	ts "github.com/zonewave/copyer/templates"
 	"github.com/zonewave/copyer/xutil"
 )
@@ -16,15 +14,17 @@ var (
 	}
 )
 
-func NewTmpl(tmplType common.ActionType) mo.Result[*template.Template] {
-	switch tmplType {
-	case common.Local:
-		return NewCopyTemplate()
-	case common.Outfile:
-		return mo.TupleToResult(NewOutPutFileTemplate())
-	default:
-		return mo.Err[*template.Template](errors.Errorf("tmplType %s not found", tmplType))
-	}
+type Templates struct {
+	CopyTemplate   *template.Template
+	ImportTemplate *template.Template
+}
+
+func NewTemplates(copyTemplate *template.Template, importTemplate *template.Template) *Templates {
+	return &Templates{CopyTemplate: copyTemplate, ImportTemplate: importTemplate}
+}
+
+func NewTmpl() mo.Result[*Templates] {
+	return xutil.Map2(NewCopyTemplate(), NewImportTemplate(), NewTemplates)
 }
 
 func NewCopyTemplate() mo.Result[*template.Template] {
@@ -33,10 +33,20 @@ func NewCopyTemplate() mo.Result[*template.Template] {
 		template.New(ts.CopyTmplName.String()).Funcs(funcsMap).ParseFS(ts.Fs, ts.CopyTmplName.FileName()),
 	).
 		MapErr(mapErrWrap("load CopyTmplName template error")).
-		Map(func(tmpl *template.Template) (*template.Template, error) {
-			return tmpl.New("only out copyFunc").Parse(ts.CopyTmplName.Template())
-		}).
-		MapErr(mapErrWrap("parse copyTemplate error"))
+		FlatMap(func(tmpl *template.Template) mo.Result[*template.Template] {
+			return mo.TupleToResult(tmpl.New("only out copyFunc").Parse(ts.CopyTmplName.Template())).MapErr(mapErrWrap("parse copyTemplate error"))
+		})
+
+}
+func NewImportTemplate() mo.Result[*template.Template] {
+	mapErrWrap := xutil.MapWrap[*template.Template]
+	return mo.TupleToResult(
+		template.New(ts.CopyTmplName.String()).Funcs(funcsMap).ParseFS(ts.Fs, ts.CopyTmplName.FileName()),
+	).
+		MapErr(mapErrWrap("load import template error")).
+		FlatMap(func(tmpl *template.Template) mo.Result[*template.Template] {
+			return mo.TupleToResult(tmpl.New(" out import").Parse(ts.ImportTmplName.Template())).MapErr(mapErrWrap("parse ImportTmpl error"))
+		})
 
 }
 

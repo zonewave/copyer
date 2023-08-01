@@ -3,9 +3,7 @@ package generate
 import (
 	"bytes"
 	"go/format"
-	"text/template"
 
-	"github.com/cockroachdb/errors"
 	"github.com/samber/mo"
 	"github.com/zonewave/copyer/output"
 	"github.com/zonewave/copyer/parser"
@@ -17,8 +15,8 @@ import (
 
 // Generator is a code generator
 type Generator struct {
-	Param *xtemplate.CopyParam
-	Tmpl  *template.Template
+	ParseResult *parser.ParseTemplateParamResult
+	Tmpls       *xtemplate.Templates
 }
 
 func NewParseTemplateParamArg(arg *GeneratorArg, pkg *packages.Package) *parser.ParseTemplateParamArg {
@@ -32,6 +30,7 @@ func NewParseTemplateParamArg(arg *GeneratorArg, pkg *packages.Package) *parser.
 		DstPkg:      arg.DstPkg,
 		DstTypeName: arg.DstType,
 		Pkg:         pkg,
+		FuncLine:    arg.OutLine,
 	}
 }
 
@@ -47,15 +46,15 @@ func NewGenerator(arg *GeneratorArg) mo.Result[*Generator] {
 	)
 
 	// parser templates param
-	tmplParam := xutil.FlatMap(args, parser.ParseTemplateParam)
+	parseResult := xutil.FlatMap(args, parser.ParseTemplateParam)
 
 	// load templates
-	tmpl := xtemplate.NewTmpl(arg.Action)
+	tmpl := xtemplate.NewTmpl()
 
-	return xutil.Map2(tmpl, tmplParam, newGenerate)
+	return xutil.Map2(tmpl, parseResult, newGenerate)
 }
-func newGenerate(tmpl *template.Template, param *xtemplate.CopyParam) *Generator {
-	return &Generator{Param: param, Tmpl: tmpl}
+func newGenerate(tmpls *xtemplate.Templates, parseResult *parser.ParseTemplateParamResult) *Generator {
+	return &Generator{ParseResult: parseResult, Tmpls: tmpls}
 }
 
 // OutPut is a wrapper of io.Writer
@@ -67,12 +66,13 @@ func OutPut(fileLine int, bs []byte, out output.Writer) mo.Result[bool] {
 }
 
 func ProduceCode(g *Generator) mo.Result[[]byte] {
-	return xutil.FlatMap(g.BufferExecute(new(bytes.Buffer)), formatCode).MapErr(xutil.MapWrapf[[]byte]("format code %s", g.Tmpl.Name()))
+	return xutil.FlatMap(g.BufferExecute(new(bytes.Buffer)), formatCode).
+		MapErr(xutil.MapWrap[[]byte]("format code failed"))
 }
 
 func (g *Generator) BufferExecute(value *bytes.Buffer) mo.Result[*bytes.Buffer] {
-	err := g.Tmpl.Execute(value, g.Param)
-	return mo.TupleToResult(value, errors.Wrapf(err, "execute templates %s", g.Tmpl.Name()))
+	err := g.Tmpls.CopyTemplate.Execute(value, g.ParseResult.TmplParam.CopyFunc)
+	return mo.TupleToResult(value, err)
 }
 
 func formatCode(value *bytes.Buffer) mo.Result[[]byte] {
