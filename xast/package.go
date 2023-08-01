@@ -11,6 +11,7 @@ import (
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/samber/mo"
 	"github.com/zonewave/copyer/xutil"
+	"github.com/zonewave/copyer/xutil/xmo"
 	"github.com/zonewave/copyer/xutil/xslice"
 	"golang.org/x/tools/go/packages"
 )
@@ -72,7 +73,7 @@ func VarSpecParseTry(pkg *packages.Package, file *ast.File, pairs ...*VariableDe
 			return value, nil
 		})
 
-	return xutil.FlatMap(pkgs, func(pkgs map[string]*packages.Package) mo.Result[map[string]*VarDataSpec] {
+	return xmo.FlatMap(pkgs, func(pkgs map[string]*packages.Package) mo.Result[map[string]*VarDataSpec] {
 		// search typeSpec
 		ret := make(map[string]*VarDataSpec)
 		astSpec := &AstSpec{
@@ -162,7 +163,7 @@ func importedPkgFind(pkg *packages.Package, file *ast.File, importPkgNames ...st
 	return ret
 }
 func FindAstFile(pkg *packages.Package, fileName string) mo.Result[*ast.File] {
-	return xslice.FindByR(pkg.Syntax, func(_ int, file *ast.File) bool {
+	return xslice.FindByE(pkg.Syntax, func(_ int, file *ast.File) bool {
 		return getFileName(pkg, file) == fileName
 	}, errors.Newf("file %s not found", fileName))
 }
@@ -184,10 +185,10 @@ func loadPkgs(patterns []string, opts ...func(config *packages.Config)) mo.Resul
 }
 
 func LoadLocalPkg(pkgName string, opts ...func(config *packages.Config)) mo.Result[*packages.Package] {
-	return xutil.FlatMap(
+	return xmo.FlatMap(
 		loadPkgs([]string{"./"}, opts...),
 		func(pkgs []*packages.Package) mo.Result[*packages.Package] {
-			return xslice.FindByR(pkgs, func(index int, item *packages.Package) bool {
+			return xslice.FindByE(pkgs, func(index int, item *packages.Package) bool {
 				return item.Name == pkgName
 			}, errors.New("must load local pkg"))
 		},

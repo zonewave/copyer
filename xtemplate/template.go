@@ -5,7 +5,7 @@ import (
 
 	"github.com/samber/mo"
 	ts "github.com/zonewave/copyer/templates"
-	"github.com/zonewave/copyer/xutil"
+	"github.com/zonewave/copyer/xutil/xmo"
 )
 
 var (
@@ -24,11 +24,11 @@ func NewTemplates(copyTemplate *template.Template, importTemplate *template.Temp
 }
 
 func NewTmpl() mo.Result[*Templates] {
-	return xutil.Map2(NewCopyTemplate(), NewImportTemplate(), NewTemplates)
+	return xmo.Map2(NewCopyTemplate(), NewImportTemplate(), NewTemplates)
 }
 
 func NewCopyTemplate() mo.Result[*template.Template] {
-	mapErrWrap := xutil.MapWrap[*template.Template]
+	mapErrWrap := xmo.MapWrap[*template.Template]
 	return mo.TupleToResult(
 		template.New(ts.CopyTmplName.String()).Funcs(funcsMap).ParseFS(ts.Fs, ts.CopyTmplName.FileName()),
 	).
@@ -39,7 +39,7 @@ func NewCopyTemplate() mo.Result[*template.Template] {
 
 }
 func NewImportTemplate() mo.Result[*template.Template] {
-	mapErrWrap := xutil.MapWrap[*template.Template]
+	mapErrWrap := xmo.MapWrap[*template.Template]
 	return mo.TupleToResult(
 		template.New(ts.CopyTmplName.String()).Funcs(funcsMap).ParseFS(ts.Fs, ts.CopyTmplName.FileName()),
 	).

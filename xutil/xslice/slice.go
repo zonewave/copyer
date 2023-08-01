@@ -10,7 +10,7 @@ func FindBy[T any](s []T, predicate func(index int, item T) bool) mo.Option[T] {
 	return mo.TupleToOption(slice.FindBy(s, predicate))
 }
 
-func FindByR[T any](s []T, predicate func(index int, item T) bool, err error) mo.Result[T] {
+func FindByE[T any](s []T, predicate func(index int, item T) bool, err error) mo.Result[T] {
 	ret, ok := slice.FindBy(s, predicate)
 	if ok {
 		return mo.Ok[T](ret)

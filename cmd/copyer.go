@@ -8,16 +8,16 @@ import (
 	"github.com/zonewave/copyer/common"
 	generate "github.com/zonewave/copyer/generate"
 	"github.com/zonewave/copyer/output"
-	"github.com/zonewave/copyer/xutil"
+	"github.com/zonewave/copyer/xutil/xmo"
 )
 
 func LocalCopy(param *RootParam) error {
 	env := param.Env
 	flag := param.CmdFlag
 	dir := mo.TupleToResult(os.Getwd()).
-		MapErr(xutil.MapWrap[string]("get current dir error"))
+		MapErr(xmo.MapWrap[string]("get current dir error"))
 
-	gArg := xutil.Map(dir, func(dir string) *generate.GeneratorArg {
+	gArg := xmo.Map(dir, func(dir string) *generate.GeneratorArg {
 		return &generate.GeneratorArg{
 			Action:         common.Local,
 			GoFile:         dir + "/" + env.GoFile,
@@ -35,14 +35,14 @@ func LocalCopy(param *RootParam) error {
 			Print:          false,
 		}
 	})
-	return xutil.FlatMap(gArg, generateCode).Error()
+	return xmo.FlatMap(gArg, generateCode).Error()
 }
 
 func generateCode(arg *generate.GeneratorArg) mo.Result[bool] {
 
-	bs := xutil.FlatMap(generate.NewGenerator(arg), generate.ProduceCode)
+	bs := xmo.FlatMap(generate.NewGenerator(arg), generate.ProduceCode)
 
-	return xutil.FlatMap2(bs, mo.Ok(OutPutGet(arg)), func(bs []byte, out output.Writer) mo.Result[bool] {
+	return xmo.FlatMap2(bs, mo.Ok(OutPutGet(arg)), func(bs []byte, out output.Writer) mo.Result[bool] {
 		return generate.OutPut(arg.GoLine, bs, out)
 	})
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/cockroachdb/errors"
 	"github.com/samber/mo"
-	"github.com/zonewave/copyer/xutil"
+	"github.com/zonewave/copyer/xutil/xmo"
 )
 
 type Env struct {
@@ -24,7 +24,7 @@ func GoLineGet() mo.Result[int] {
 	if str != "" {
 		val, err := strconv.ParseInt(str, 10, 64)
 		return mo.TupleToResult(int(val), err).
-			MapErr(xutil.MapWrap[int]("parse env GOLINE error"))
+			MapErr(xmo.MapWrap[int]("parse env GOLINE error"))
 	} else {
 		return mo.Ok(0)
 	}
@@ -39,6 +39,6 @@ func EnvStringGet(name string) mo.Result[string] {
 }
 
 func NewEnv() mo.Result[*Env] {
-	return xutil.Map3(GoLineGet(), EnvStringGet("GOFILE"), EnvStringGet("GOPACKAGE"), newEnv)
+	return xmo.Map3(GoLineGet(), EnvStringGet("GOFILE"), EnvStringGet("GOPACKAGE"), newEnv)
 
 }

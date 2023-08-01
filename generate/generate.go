@@ -9,7 +9,7 @@ import (
 	"github.com/zonewave/copyer/parser"
 	"github.com/zonewave/copyer/xast"
 	"github.com/zonewave/copyer/xtemplate"
-	"github.com/zonewave/copyer/xutil"
+	"github.com/zonewave/copyer/xutil/xmo"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -37,7 +37,7 @@ func NewParseTemplateParamArg(arg *GeneratorArg, pkg *packages.Package) *parser.
 // NewGenerator creates a new generator
 func NewGenerator(arg *GeneratorArg) mo.Result[*Generator] {
 
-	args := xutil.Map2(
+	args := xmo.Map2(
 		mo.Ok(arg),
 		// load ast.pkgs
 		xast.LoadLocalPkg(arg.GoPkg, arg.LoadConfigOpts...),
@@ -46,12 +46,12 @@ func NewGenerator(arg *GeneratorArg) mo.Result[*Generator] {
 	)
 
 	// parser templates param
-	parseResult := xutil.FlatMap(args, parser.ParseTemplateParam)
+	parseResult := xmo.FlatMap(args, parser.ParseTemplateParam)
 
 	// load templates
 	tmpl := xtemplate.NewTmpl()
 
-	return xutil.Map2(tmpl, parseResult, newGenerate)
+	return xmo.Map2(tmpl, parseResult, newGenerate)
 }
 func newGenerate(tmpls *xtemplate.Templates, parseResult *parser.ParseTemplateParamResult) *Generator {
 	return &Generator{ParseResult: parseResult, Tmpls: tmpls}
@@ -66,8 +66,8 @@ func OutPut(fileLine int, bs []byte, out output.Writer) mo.Result[bool] {
 }
 
 func ProduceCode(g *Generator) mo.Result[[]byte] {
-	return xutil.FlatMap(g.BufferExecute(new(bytes.Buffer)), formatCode).
-		MapErr(xutil.MapWrap[[]byte]("format code failed"))
+	return xmo.FlatMap(g.BufferExecute(new(bytes.Buffer)), formatCode).
+		MapErr(xmo.MapWrap[[]byte]("format code failed"))
 }
 
 func (g *Generator) BufferExecute(value *bytes.Buffer) mo.Result[*bytes.Buffer] {

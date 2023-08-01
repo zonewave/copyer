@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/samber/mo"
 	"github.com/spf13/cobra"
-	"github.com/zonewave/copyer/xutil"
+	"github.com/zonewave/copyer/xutil/xmo"
 )
 
 type RootParam struct {
@@ -16,5 +16,5 @@ func NewRootParamCtr(env *Env, cmdFlag *RootCmdFlag) *RootParam {
 }
 
 func NewRootParam(cmd *cobra.Command) mo.Result[*RootParam] {
-	return xutil.Map2(NewEnv(), RootCmdFlagGet(cmd), NewRootParamCtr)
+	return xmo.Map2(NewEnv(), RootCmdFlagGet(cmd), NewRootParamCtr)
 }

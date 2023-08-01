@@ -7,7 +7,7 @@ import (
 	"github.com/samber/mo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"github.com/zonewave/copyer/xutil"
+	"github.com/zonewave/copyer/xutil/xmo"
 )
 
 func FlagsStringGet(set *pflag.FlagSet) func(name string) mo.Result[string] {
@@ -39,7 +39,7 @@ func (r *RootCmdFlag) String() string {
 func RootCmdFlagGet(cmd *cobra.Command) mo.Result[*RootCmdFlag] {
 	flags := cmd.Flags()
 	flagStrings := FlagsStringGet(flags)
-	return xutil.Map3(flagStrings("src"), flagStrings("dst"), FlagsBoolGet(flags)("print"), func(src, dst string, print bool) *RootCmdFlag {
+	return xmo.Map3(flagStrings("src"), flagStrings("dst"), FlagsBoolGet(flags)("print"), func(src, dst string, print bool) *RootCmdFlag {
 		srcPkg, srcType := parseSrcDstFlagName(src)
 		dstPkg, dstType := parseSrcDstFlagName(dst)
 		return &RootCmdFlag{
@@ -72,5 +72,5 @@ func (r *OutfileCmdFlag) String() string {
 func OutfileCmdFlagGet(cmd *cobra.Command) mo.Result[*OutfileCmdFlag] {
 	flags := cmd.Flags()
 	flagStrings := FlagsStringGet(flags)
-	return xutil.Map3(flagStrings("out"), flagStrings("package"), RootCmdFlagGet(cmd), NewOutfileCmdFlag)
+	return xmo.Map3(flagStrings("out"), flagStrings("package"), RootCmdFlagGet(cmd), NewOutfileCmdFlag)
 }

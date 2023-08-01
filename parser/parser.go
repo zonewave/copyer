@@ -8,6 +8,7 @@ import (
 	"github.com/zonewave/copyer/xast"
 	"github.com/zonewave/copyer/xtemplate"
 	"github.com/zonewave/copyer/xutil"
+	"github.com/zonewave/copyer/xutil/xmo"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -37,7 +38,7 @@ func NewParseTemplateParamResult(tmplParam *xtemplate.FileParam, importLine, fun
 func ParseTemplateParam(arg *ParseTemplateParamArg) mo.Result[*ParseTemplateParamResult] {
 	file := xast.FindAstFile(arg.Pkg, arg.FileName)
 
-	varDataSpec := xutil.FlatMap(
+	varDataSpec := xmo.FlatMap(
 		file,
 		func(file *ast.File) mo.Result[map[string]*xast.VarDataSpec] {
 			return xast.VarSpecParseTry(arg.Pkg, file,
@@ -47,7 +48,7 @@ func ParseTemplateParam(arg *ParseTemplateParamArg) mo.Result[*ParseTemplatePara
 		},
 	)
 
-	return xutil.Map(varDataSpec, func(varDataSpec map[string]*xast.VarDataSpec) *ParseTemplateParamResult {
+	return xmo.Map(varDataSpec, func(varDataSpec map[string]*xast.VarDataSpec) *ParseTemplateParamResult {
 		src := varDataSpec[arg.SrcName]
 		dst := varDataSpec[arg.DstName]
 		varParam := xtemplate.NewTemplateParam(parseVar(arg.Pkg, src), parseVar(arg.Pkg, dst))
