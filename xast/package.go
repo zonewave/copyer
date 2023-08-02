@@ -73,36 +73,38 @@ func VarSpecParseTry(pkg *packages.Package, file *ast.File, pairs ...*VariableDe
 			return value, nil
 		})
 
-	return xmo.FlatMap(pkgs, func(pkgs map[string]*packages.Package) mo.Result[map[string]*VarDataSpec] {
-		// search typeSpec
-		ret := make(map[string]*VarDataSpec)
-		astSpec := &AstSpec{
-			Pkg:      pkg,
-			File:     file,
-			TypeSpec: nil,
-		}
-		for _, pair := range pairs {
-			ret[pair.varName] = &VarDataSpec{
-				Name:            pair.varName,
-				TypePackageName: pair.pkgName,
-				AstSpec:         astSpec,
+	return xmo.FlatMap(
+		pkgs,
+		func(pkgs map[string]*packages.Package) mo.Result[map[string]*VarDataSpec] {
+			// search typeSpec
+			ret := make(map[string]*VarDataSpec)
+			astSpec := &AstSpec{
+				Pkg:      pkg,
+				File:     file,
+				TypeSpec: nil,
 			}
-		}
-		for pkgName, fPkg := range pkgs {
-			gPairs := pairsByPkg[pkgName]
-			typeNames := slice.Map(gPairs, func(_ int, item *VariableDef) string {
-				return item.typeName
-			})
-			typeSpec := TypeSpecGet(fPkg, typeNames...).Map(xutil.ChecksItems[string, *TypeSpec](typeNames...))
-			if typeSpec.IsError() {
-				return mo.Err[map[string]*VarDataSpec](typeSpec.Error())
+			for _, pair := range pairs {
+				ret[pair.varName] = &VarDataSpec{
+					Name:            pair.varName,
+					TypePackageName: pair.pkgName,
+					AstSpec:         astSpec,
+				}
 			}
-			for _, pair := range gPairs {
-				ret[pair.varName].TypeSpec = typeSpec.MustGet()[pair.typeName]
+			for pkgName, fPkg := range pkgs {
+				gPairs := pairsByPkg[pkgName]
+				typeNames := slice.Map(gPairs, func(_ int, item *VariableDef) string {
+					return item.typeName
+				})
+				typeSpec := TypeSpecGet(fPkg, typeNames...).Map(xutil.ChecksItems[string, *TypeSpec](typeNames...))
+				if typeSpec.IsError() {
+					return mo.Err[map[string]*VarDataSpec](typeSpec.Error())
+				}
+				for _, pair := range gPairs {
+					ret[pair.varName].TypeSpec = typeSpec.MustGet()[pair.typeName]
+				}
 			}
-		}
-		return mo.Ok(ret)
-	})
+			return mo.Ok(ret)
+		})
 
 }
 

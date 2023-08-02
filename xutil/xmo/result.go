@@ -65,6 +65,17 @@ func Map2E[T1, T2, V any](m1 mo.Result[T1], m2 mo.Result[T2], fn func(T1, T2) (V
 	}
 	return mo.TupleToResult(fn(m1.MustGet(), m2.MustGet()))
 }
+
+func ToSlice[T any](slices ...mo.Result[T]) mo.Result[[]T] {
+	var ret []T
+	for _, s := range slices {
+		if s.IsError() {
+			return mo.Err[[]T](s.Error())
+		}
+		ret = append(ret, s.MustGet())
+	}
+	return mo.Ok(ret)
+}
 func MapWrap[T any](message string) func(err error) (T, error) {
 	return func(err error) (v T, e error) {
 		return v, errors.Wrap(err, message)

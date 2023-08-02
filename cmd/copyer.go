@@ -35,16 +35,26 @@ func LocalCopy(param *RootParam) error {
 			Print:          false,
 		}
 	})
-	return xmo.FlatMap(gArg, generateCode).Error()
+	return xmo.FlatMap(
+		gArg,
+		generateCode,
+	).Error()
 }
 
 func generateCode(arg *generate.GeneratorArg) mo.Result[bool] {
 
-	bs := xmo.FlatMap(generate.NewGenerator(arg), generate.ProduceCode)
+	outData := xmo.FlatMap(
+		generate.NewGenerator(arg),
+		generate.ProduceCode,
+	)
 
-	return xmo.FlatMap2(bs, mo.Ok(OutPutGet(arg)), func(bs []byte, out output.Writer) mo.Result[bool] {
-		return generate.OutPut(arg.GoLine, bs, out)
-	})
+	return xmo.FlatMap(
+		outData,
+		func(data []*output.LinesData) mo.Result[bool] {
+			out := OutPutGet(arg)
+			return generate.OutPut(data, out)
+		},
+	)
 
 }
 func OutPutGet(arg *generate.GeneratorArg) output.Writer {
