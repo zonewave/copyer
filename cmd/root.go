@@ -5,6 +5,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/zonewave/copyer/log"
+	. "github.com/zonewave/copyer/log/jlog"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -22,7 +24,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
-		logrus.WithFields(logrus.Fields{
+		JLog.WithFields(logrus.Fields{
 			"param": param,
 		}).Info("copyer load flag and env...")
 		err = LocalCopy(param)
@@ -45,7 +47,7 @@ func Execute() {
 }
 
 func init() {
-	initLogrus()
+	log.InitLogger()
 	flags := rootCmd.PersistentFlags()
 	flags.StringP("src", "s", "", "src type name")
 	flags.StringP("dst", "d", "", "dst type name")
@@ -54,13 +56,4 @@ func init() {
 	rootCmd.AddCommand(outfileCmd)
 	outfileCmd.Flags().StringP("out", "o", "", "out file name;default,it is copy_{{dst}}.go")
 	outfileCmd.Flags().String("package", "", "package name;default, it is current packageName")
-}
-
-func initLogrus(opts ...func()) {
-	// Log as JSON instead of the default ASCII formatter.
-	logrus.SetFormatter(&logrus.TextFormatter{})
-	logrus.SetOutput(os.Stdout)
-	for _, opt := range opts {
-		opt()
-	}
 }

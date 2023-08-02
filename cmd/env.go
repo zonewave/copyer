@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"os"
 	"strconv"
 
@@ -15,6 +16,10 @@ type Env struct {
 	GoPackage string
 }
 
+func (r *Env) String() string {
+	bs, _ := json.Marshal(r)
+	return string(bs)
+}
 func newEnv(goLine int, goFile string, goPackage string) *Env {
 	return &Env{GoLine: goLine, GoFile: goFile, GoPackage: goPackage}
 }
@@ -31,7 +36,7 @@ func GoLineGet() mo.Result[int] {
 }
 
 func EnvStringGet(name string) mo.Result[string] {
-	val := os.Getenv("GOFILE")
+	val := os.Getenv(name)
 	if val == "" {
 		return mo.Err[string](errors.Newf("env %s is empty", name))
 	}
