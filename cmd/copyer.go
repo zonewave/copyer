@@ -6,7 +6,7 @@ import (
 
 	"github.com/samber/mo"
 	"github.com/zonewave/copyer/common"
-	generate "github.com/zonewave/copyer/generate"
+	"github.com/zonewave/copyer/generate"
 	"github.com/zonewave/copyer/output"
 	"github.com/zonewave/copyer/xutil/xmo"
 )

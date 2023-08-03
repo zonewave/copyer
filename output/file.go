@@ -30,8 +30,8 @@ func (o *File) LineDataBatchInsert(linesDataBatch ...*LinesData) error {
 	sort.Slice(linesDataBatch, func(i, j int) bool {
 		return linesDataBatch[i].StartLine < linesDataBatch[j].StartLine
 	})
-	newLinesDataIter := iterator.FromSlice(linesDataBatch)
-	newLinesData, _ := newLinesDataIter.Next()
+	newLinesDataItr := iterator.FromSlice(linesDataBatch)
+	newLinesData, _ := newLinesDataItr.Next()
 	// read lines
 	var lines [][]byte
 	currentLine := 1
@@ -39,7 +39,7 @@ func (o *File) LineDataBatchInsert(linesDataBatch ...*LinesData) error {
 		lines = append(lines, scanner.Bytes())
 		for newLinesData != nil && currentLine == newLinesData.StartLine {
 			lines = append(lines, newLinesData.Bytes)
-			newLinesData, _ = newLinesDataIter.Next()
+			newLinesData, _ = newLinesDataItr.Next()
 		}
 		currentLine++
 	}
@@ -49,7 +49,7 @@ func (o *File) LineDataBatchInsert(linesDataBatch ...*LinesData) error {
 	}
 	for newLinesData != nil {
 		lines = append(lines, newLinesData.Bytes)
-		newLinesData, _ = newLinesDataIter.Next()
+		newLinesData, _ = newLinesDataItr.Next()
 	}
 
 	// if newLineNum is out of range

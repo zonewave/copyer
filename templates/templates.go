@@ -11,7 +11,6 @@ var Fs embed.FS
 type TmplName string
 
 const (
-	AllTmplName     TmplName = "copyer"
 	CopyTmplName    TmplName = "copyFunc"
 	ImportTmplName  TmplName = "import"
 	OutFileTmplName TmplName = "outfile"

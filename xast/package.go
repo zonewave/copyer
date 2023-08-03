@@ -33,9 +33,6 @@ type VarDataSpec struct {
 func NewVarDataSpec(name string, astSpec *AstSpec, typePackageName string, typeSpec *TypeSpec) *VarDataSpec {
 	return &VarDataSpec{Name: name, AstSpec: astSpec, TypePackageName: typePackageName, TypeSpec: typeSpec}
 }
-func NewVarDataSpecFromPair(astSpec *AstSpec, pair *VariableDef) *VarDataSpec {
-	return NewVarDataSpec(pair.varName, astSpec, pair.pkgName, nil)
-}
 func (v *VarDataSpec) IsPublic() bool {
 
 	return ast.IsExported(v.Name)
